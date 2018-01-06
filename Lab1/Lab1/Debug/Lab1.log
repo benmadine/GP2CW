@@ -1,0 +1,11 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (GPCoursework.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  ShaderManager.cpp
+  MeshManager.cpp
+c:\users\benma\desktop\new folder\gp2cw\lab1\lab1\meshmanager.cpp(73): warning C4930: 'SphereCollider sphereMesh(void)': prototyped function not called (was a variable definition intended?)
+  GameManager.cpp
+c:\users\benma\desktop\new folder\gp2cw\lab1\lab1\gamemanager.cpp(25): warning C4101: 'alienMesh': unreferenced local variable
+  AudioManager.cpp
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  main.cpp
+  Lab1.vcxproj -> C:\Users\benma\Desktop\New folder\GP2CW\Lab1\Debug\Lab1.exe
