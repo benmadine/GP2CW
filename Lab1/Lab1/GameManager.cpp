@@ -4,12 +4,18 @@
 #include <string>
 
 unsigned int indices[] = { 0,1,2 };
+unsigned int skyBox[6];
+enum SkyBoxFaces
+{
+	SkyLeft = 0, SkyBack = 1, SkyRight = 2, SkyFront = 3, SkyTop = 4, SkyBottom = 5
+};
 
 ///Summary <Transforms>
 //Different transfroms for the different models
 Transform transMonkey; 
 Transform transPlayer;
 Transform transBullet;
+Transform transSky;
 
 
 GameManager::GameManager()
@@ -121,10 +127,12 @@ void GameManager::inputProcess()
 				PlayerMovement(0.0f, -0.5f); //Moves the player 0.5f down
 				break;
 			case SDLK_SPACE:
+				transBullet.SetPos(glm::vec3(transPlayer.GetPos()->x, transPlayer.GetPos()->y, 10.0));
 				bulletFired = true; //When the user presses space then the boolean is actiavtes, check draw method to see where it goes next
+				collision = false; //So multiple bullets can be fired and still collide with aliens
 				break;
 #pragma endregion
-				
+
 #pragma region CameraStuff
 			case SDLK_LEFT:
 				myCam.MoveLeft(1); //Moves the camera left
@@ -174,7 +182,6 @@ bool GameManager::colliderChecker(glm::vec3 m1Position, float m1Radius, glm::vec
 
 	if (dist < (m1Radius + m2Radius)) //If dist is less than radius then collision is true
 	{
-		bulletFired = false;
 		collision = true;	
 		audioDevice.ListenerSetting(myCam.getPos(), m1Position); //add bool to mesh
 		playAudio(alienDie, m1Position);
@@ -215,15 +222,10 @@ void GameManager::BulletManager()
 	TextureManager textures("..\\res\\AppleTexture.jpg"); //Applies appropriate texture to apple
 
 	shader1.Bind(); //Binds the shader
-	transBullet.SetPos(glm::vec3(transPlayer.GetPos()->x, transPlayer.GetPos()->y + 1 * 2, 10.0)); //Updates the bullet position
+	transBullet.SetPos(glm::vec3(transBullet.GetPos()->x, transBullet.GetPos()->y + 1, 10.0)); //Updates the bullet position
 	transBullet.SetScale(glm::vec3(0.01, 0.01, 0.01)); //Sets the bullet scale
 
 	shader1.Update(transBullet, myCam); //Updates bullet posiition
-	if (transBullet.GetPos()->y >= transPlayer.GetPos()->y) //Makes sure the bullet continues to move
-	{
-		transBullet.SetPos(glm::vec3(transBullet.GetPos()->x, transBullet.GetPos()->y + counter, 10));
-		shader1.Update(transBullet, myCam); //Updates the bullets position
-	}
 
 	textures.Binder(0); //Texture binder
 
@@ -294,9 +296,114 @@ void GameManager::AlienManager()
 		if (collision == false || alienCollisioner == false) //Checks if the collision
 		{
 			alienMesh[i].Drawing();
-		}
-		
+		}		
 	}
+}
+
+void GameManager::SkyBoxMethod() //Used to generate the skybox
+{
+	TextureManager skyTexture[7] = { "..\\res\\SkyBoxBlue.jpg" , "..\\res\\SkyBoxGreen.jpg" ,
+		"..\\res\\SkyBoxLightBlue.jpg" , "..\\res\\AlienShaderPink.jpg", "..\\res\\SkyBoxYellow.jpg", 
+		"..\\res\\AlienShaderRed.jpg", "..\\res\\AlienShaderPink.jpg" }; //The multiple textures used for the skybox
+
+	transSky.SetPos(glm::vec3(transPlayer.GetPos()->x, transPlayer.GetPos()->y, transPlayer.GetPos()->z)); //Setting skybox to players position
+	glEnable(GL_TEXTURE_2D); //Enables texturing
+	shader1.Bind(); //Binds the shader
+	shader1.Update(transSky, myCam); //Updates the shaders posiitons
+	skyTexture[rand() % 7].Binder(0); //Binds a random texture
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0); //Sets the texture coord
+	glVertex3f(skyBoxSize / 2, -skyBoxSize / 2, skyBoxSize / 2); //Skybox size
+	glTexCoord2f(1, 0); //Texture coordinate
+	glVertex3f(-skyBoxSize / 2, -skyBoxSize / 2, skyBoxSize / 2); //SKybox size
+	glTexCoord2f(1, 1); //Texture Coordinate
+	glVertex3f(-skyBoxSize / 2, skyBoxSize / 2, skyBoxSize / 2); //Skybox size
+	glTexCoord2f(0, 1); //Texture coordinate
+	glVertex3f(skyBoxSize / 2, skyBoxSize / 2, skyBoxSize / 2); //Skybox
+	glEnd(); //glbinding
+
+#pragma region Other SkyBoxFaces
+	shader1.Bind();
+	shader1.Update(transSky, myCam);
+	skyTexture[rand() % 7].Binder(0);
+	glBegin(GL_QUADS);
+	//left face
+	glTexCoord2f(0, 0);
+	glVertex3f(-skyBoxSize / 2, -skyBoxSize / 2, skyBoxSize / 2);
+	glTexCoord2f(1, 0);
+	glVertex3f(-skyBoxSize / 2, -skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(1, 1);
+	glVertex3f(-skyBoxSize / 2, skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(0, 1);
+	glVertex3f(-skyBoxSize / 2, skyBoxSize / 2, skyBoxSize / 2);
+	glEnd();
+
+	shader1.Bind();
+	shader1.Update(transSky, myCam);
+	skyTexture[rand() % 7].Binder(0);
+
+
+	glBegin(GL_QUADS);
+	//front face
+	glTexCoord2f(1, 0);
+	glVertex3f(skyBoxSize / 2, skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(0, 0);
+	glVertex3f(-skyBoxSize / 2, skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(0, 1);
+	glVertex3f(-skyBoxSize / 2, -skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(1, 1);
+	glVertex3f(skyBoxSize / 2, -skyBoxSize / 2, -skyBoxSize / 2);
+	glEnd();
+
+	shader1.Bind();
+	shader1.Update(transSky, myCam);
+	skyTexture[rand() % 7].Binder(0);
+
+
+	glBegin(GL_QUADS);
+	//right face
+	glTexCoord2f(0, 0);
+	glVertex3f(skyBoxSize / 2, -skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(1, 0);
+	glVertex3f(skyBoxSize / 2, -skyBoxSize / 2, skyBoxSize / 2);
+	glTexCoord2f(1, 1);
+	glVertex3f(skyBoxSize / 2, skyBoxSize / 2, skyBoxSize / 2);
+	glTexCoord2f(0, 1);
+	glVertex3f(skyBoxSize / 2, skyBoxSize / 2, -skyBoxSize / 2);
+	glEnd();
+
+	shader1.Bind();
+	shader1.Update(transSky, myCam);
+	skyTexture[rand() % 7].Binder(0);
+
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(1, 0);
+	glVertex3f(skyBoxSize / 2, skyBoxSize / 2, -skyBoxSize / 2);//
+	glTexCoord2f(0, 0);
+	glVertex3f(-skyBoxSize / 2, skyBoxSize / 2, -skyBoxSize / 2);//
+	glTexCoord2f(0, 1);
+	glVertex3f(-skyBoxSize / 2, skyBoxSize / 2, skyBoxSize / 2);
+	glTexCoord2f(1, 1);
+	glVertex3f(skyBoxSize / 2, skyBoxSize / 2, skyBoxSize / 2);
+	glEnd();
+
+	shader1.Bind();
+	shader1.Update(transSky, myCam);
+	skyTexture[rand() % 7].Binder(0);
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(1, 1);
+	glVertex3f(skyBoxSize / 2, -skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(0, 1);
+	glVertex3f(-skyBoxSize / 2, -skyBoxSize / 2, -skyBoxSize / 2);
+	glTexCoord2f(0, 0);
+	glVertex3f(-skyBoxSize / 2, -skyBoxSize / 2, skyBoxSize / 2);
+	glTexCoord2f(1, 0);
+	glVertex3f(skyBoxSize / 2, -skyBoxSize / 2, skyBoxSize / 2);
+	glEnd();
+#pragma endregion
 }
 
 void GameManager::drawingGame()
@@ -310,6 +417,8 @@ void GameManager::drawingGame()
 	AlienManager(); //Calls the alien managaer method
 
 	PlayerManager(); //Calls the player manager method
+
+	SkyBoxMethod();
 
 	if (bulletFired) //Checks if the bullet has been fired, if so then call bullet manager method
 	{

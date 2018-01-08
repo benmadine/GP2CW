@@ -43,6 +43,8 @@ private:
 
 	void BulletManager(); //Bullet Method
 
+	void SkyBoxMethod(); //SkyBoxDrawMethod
+
 	bool colliderChecker(glm::vec3 m1Position, float m1Radius, glm::vec3 m2Position, float m2Radius); //For Bullet/Alien
 
 	bool alienCollision(glm::vec3 m1Position, float m1Radius, glm::vec3 m2Position, float m2Radius); //For Player/Alien
@@ -56,7 +58,7 @@ private:
 	MeshManager bulletMesh; // Bullet mesh
 
 	TextureManager textures; //Different textures being used
-
+	TextureManager skyTexture[6]; //Sky box texture
 	TextureManager alienTextures[4]; //Different alien texutres, four for the four different varients
 
 	ShaderManager shader1; //Players
@@ -65,6 +67,7 @@ private:
 	CameraManager myCam; //camera varaible, how it access the camera class
 
 	float counter; //Counter float
+	float skyBoxSize = 65; //Sky box size
 
 	bool playerLoaded; //Played loaded boolean, just a check
 	bool collision; //Collision bool to see if collision is true
@@ -77,5 +80,6 @@ private:
 	unsigned int shooting; //Shooting sound 
 	unsigned int backGroundMusic; //Backgorund music sound
 	unsigned int alienDie; //Alien Die Sound
+	
 };
 
